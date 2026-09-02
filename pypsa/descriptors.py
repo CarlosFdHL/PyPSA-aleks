@@ -24,6 +24,38 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+def expand_series(ser: pd.Series, columns: Sequence[str]) -> pd.DataFrame:
+    """Expand a series to a dataframe quickly.
+
+    Columns are the given series and every single column being the equal to
+    the given series.
+
+    Parameters
+    ----------
+    ser : pd.Series
+        Input series to expand.
+    columns : Sequence[str]
+        Column names for the resulting DataFrame.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with all columns containing the same values as the input series.
+
+    Examples
+    --------
+    >>> ser = pd.Series([1, 2, 3], index=['a', 'b', 'c'])
+    >>> df = pypsa.common.expand_series(ser, ['col1', 'col2'])
+    >>> df
+       col1  col2
+    a   1.0   1.0
+    b   2.0   2.0
+    c   3.0   3.0
+
+    """
+    result = ser.to_frame(columns[0]).reindex(columns=columns).ffill(axis=1)
+    result.index.name = ser.index.name
+    return result
 
 @deprecated_in_next_major(details="Use `n.get_switchable_as_dense` instead.")
 def get_switchable_as_dense(
